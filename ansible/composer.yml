@@ -1,0 +1,37 @@
+---
+- name: Setup Web Server
+  hosts: all
+  remote_user : root
+  become: yes
+  become_method: sudo
+  vars:
+    composer_url: https://getcomposer.org/download/latest-stable/composer.phar
+
+  tasks:
+  - name: Download composer
+    get_url:
+      url: https://getcomposer.org/installer
+      dest: /tmp/composer-installer
+
+  - name: Install composer
+    command: php /tmp/composer-installer --1 --install-dir=/usr/local/bin/ --filename=composer
+    args:
+      creates: /usr/local/bin/composer
+
+  - name: Download and install Composer
+    shell: curl -sS https://getcomposer.org/installer | php
+    args:
+      chdir: /usr/src/
+      creates: /usr/local/bin/composer
+      warn: false
+    become: yes
+
+  - name: Add Composer to global path
+    copy: 
+      dest: /usr/local/bin/composer
+      group: root
+      mode: '0755'
+      owner: root
+      src: /usr/src/composer.phar
+      remote_src: yes
+    become: yes

@@ -1,0 +1,36 @@
+---
+- name: setup Apache server
+  hosts: 54.226.147.234
+  become: true
+  become_method: sudo
+#create task for the apps to be installed
+  tasks:
+  - name: install apache
+    apt:
+      name: apache2
+      state: present
+
+  - name: enabled mod_rewrite
+    apache2_module: name=rewrite state=present
+    notify:
+      - restart apache2
+
+  handlers:
+  - name: restart apache2
+    service: name=apache2 state=restarted
+
+  - name: Install PHP and associated modules
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+     - php
+     - php-cli
+     - php-mysql
+     - php-pdo
+     - php-curl
+
+  - name: Add php info file to test a working state
+    template:
+      src: /home/vagrant/index.php
+      dest: /var/www/html/index.php

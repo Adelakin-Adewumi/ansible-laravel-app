@@ -1,0 +1,32 @@
+---
+- name: Setup Web Server
+  hosts: all
+  remote_user : root
+  become: yes
+  become_method: sudo
+
+  tasks:
+  - name: set timezone to Africa/Lagos
+    timezone:
+     name: Africa/Lagos
+
+  - name: Install PHP and associated modules
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+     - php
+     - php-cli
+     - php-mysql
+     - php-pdo
+     - php-curl
+
+  - name: Add php info file to test a working state
+    template:
+      src: /home/ubuntu/index.php
+      dest: /var/www/html/index.php
+
+  - name: Restart Apache following changes
+    service:
+      name: apache2
+      state: restarted
